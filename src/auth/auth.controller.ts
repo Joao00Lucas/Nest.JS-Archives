@@ -1,16 +1,15 @@
 import { Body, Controller, Post,  UseGuards, UseInterceptors, BadRequestException, ParseFilePipe, FileTypeValidator, MaxFileSizeValidator } from "@nestjs/common";
-import { UploadedFile,  UploadedFiles } from "@nestjs/common/decorators";
-import { AuthLoginDTO } from "./dto/auth-logn.dto";
+import { Req, UploadedFile,  UploadedFiles } from "@nestjs/common/decorators";
+import { AuthLoginDTO } from "./dto/auth-login.dto";
 import { AuthRegisterDTO } from "./dto/auth-register.dto";
 import { AuthForgetDTO } from "./dto/auth-forget.dto";
 import { AuthResetDTO } from "./dto/auth-reset.dto";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "src/guards/auth.guard";
-import { User } from "src/decorators/user.decorator";
 import { FileInterceptor, FilesInterceptor, FileFieldsInterceptor } from "@nestjs/platform-express";
 import { join } from 'path';
-import { FileService } from "src/file/file.service";
-import { fileURLToPath } from "url";
+import { FileService } from "../file/file.service";
+import { AuthGuard } from "../guards/auth.guard";
+import { User } from "../decorators/user.decorator";
 
 
 @Controller('auth')
@@ -41,10 +40,16 @@ export class AuthController {
         return this.authService.reset(password, token);
     }
 
+    // @Roles(Role.Admin)
     @UseGuards(AuthGuard)
     @Post('me')
-    async me(@User('id') user) {
-        return { user }
+    async me(@User() user, @Req() req)  { //, @Req() { tokenPayload }
+        return {user: 
+            {id: user.id, 
+            name: user.name, 
+            email: user.email},
+            tokenPayload: req.tokenPayload // aqui você acessa só o necessário
+        } //tokenPayload
     }
 
     @UseInterceptors(FileInterceptor('file'))
