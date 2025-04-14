@@ -44,11 +44,10 @@ export class UserService {
     async show(id: number) {
 
         const test = await this.exists(id);
-        console.log('test do userService:', test);
 
         return this.userRepository.findOne({
             where: { id },
-            select: ['id', 'email', 'name', 'password'],
+            select: ['id', 'email', 'name', 'password', 'birthAt', 'createdAt', 'updatedAt', 'role'],
         });
 
 

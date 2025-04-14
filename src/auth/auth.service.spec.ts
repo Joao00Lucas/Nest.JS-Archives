@@ -6,6 +6,9 @@ import { userServiceMock } from "../testing/user-service.mock";
 import { mailerServiceMock } from "../testing/mailer-service.mock";
 import { userEntityList } from "../testing/user-entity-list.mock";
 import { accessToken } from "../testing/access-token.mock";
+import { jwtPayload } from "../testing/jwt-payload.mock";
+import { resetToken } from "../testing/reset-token.mock";
+import { authRegisterDTO } from "../testing/auth-register-dto.mock";
 
 
 
@@ -38,12 +41,63 @@ describe('AuthService', () => {
         test('createToken method', () => {
 
             const result = authService.createToken(userEntityList[0]);
+            
+            expect(result).toEqual({ accessToken });
 
-            expect(result).toEqual({ accessToken: accessToken })
+        });
 
-        })
+        test('checkToken method', () => {
+
+            const result = authService.checkToken(accessToken);
+            
+            expect(result).toEqual(jwtPayload);
+
+        });
+
+        test('isValidToken method', () => {
+
+            const result = authService.isValidToken(accessToken);
+            
+            expect(result).toEqual(true);
+
+        });
 
     });
 
-    describe('Authenticação', () => {});
+    describe('Authenticação', () => {
+
+        test('login method',async () => {
+
+            const result = await authService.login('joaolucas@gmail.com', '123456');
+            
+            expect(result).toEqual({accessToken});
+
+        });
+
+        test('forget method',async () => {
+
+            const result = await authService.forget('joaolucas@gmail.com');
+            
+            expect(result).toEqual({success: true});
+
+        });
+
+        test('reset method',async () => {
+
+            const result = await authService.reset('654321', resetToken);
+            
+            expect(result).toEqual({accessToken});
+
+        });
+
+        test('register method',async () => {
+
+            const result = await authService.register(authRegisterDTO);
+            
+            expect(result).toEqual({accessToken});
+
+        });
+
+
+    });
 });

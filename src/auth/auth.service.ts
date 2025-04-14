@@ -26,7 +26,7 @@ export class AuthService {
     createToken(user: UserEntity) {
         
         return {
-            acessToken: this.jwtService.sign({
+            accessToken: this.jwtService.sign({
                 id: user.id,
                 name: user.name,
                 email: user.email,
@@ -57,6 +57,8 @@ export class AuthService {
 
         try {
             this.checkToken(token);
+            console.log(this.checkToken(token));
+            
             return true;
 
         } catch (e) {
@@ -101,6 +103,7 @@ export class AuthService {
             issuer: 'forget',
             audience: 'user',
         });
+        
 
         await this.mailer.sendMail({
             subject: 'Recuperação de senha',
@@ -112,7 +115,7 @@ export class AuthService {
             }
         });
 
-        return true;
+        return {success: true};
     }
 
     async reset(password: string, token: string) {
@@ -145,6 +148,8 @@ export class AuthService {
     }
 
     async register(data: AuthRegisterDTO) {
+
+        delete data.role;
         
         const user = await this.userService.create(data);
 

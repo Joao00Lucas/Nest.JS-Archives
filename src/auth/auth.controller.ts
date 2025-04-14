@@ -6,10 +6,10 @@ import { AuthForgetDTO } from "./dto/auth-forget.dto";
 import { AuthResetDTO } from "./dto/auth-reset.dto";
 import { AuthService } from "./auth.service";
 import { FileInterceptor, FilesInterceptor, FileFieldsInterceptor } from "@nestjs/platform-express";
-import { join } from 'path';
 import { FileService } from "../file/file.service";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/user.decorator";
+import { UserEntity } from "../user/entity/user.entity";
 
 
 @Controller('auth')
@@ -40,22 +40,16 @@ export class AuthController {
         return this.authService.reset(password, token);
     }
 
-    // @Roles(Role.Admin)
     @UseGuards(AuthGuard)
     @Post('me')
-    async me(@User() user, @Req() req)  { //, @Req() { tokenPayload }
-        return {user: 
-            {id: user.id, 
-            name: user.name, 
-            email: user.email},
-            tokenPayload: req.tokenPayload // aqui você acessa só o necessário
-        } //tokenPayload
+    async me(@User() user: UserEntity)  { //, @Req() { tokenPayload }
+        return user;
     }
 
     @UseInterceptors(FileInterceptor('file'))
     @UseGuards(AuthGuard)
     @Post('photo')
-    async uploadPhoto(@User() user, 
+    async uploadPhoto(@User() user: UserEntity, 
     @UploadedFile(new ParseFilePipe({
         validators: [
             new FileTypeValidator({fileType: 'image/png'}),
@@ -63,14 +57,14 @@ export class AuthController {
         ]
     })) photo: Express.Multer.File) {
 
-        const path = join(__dirname, '..', '..', 'storage', 'photos', `photo-${user.id}.png`);
+        const filename = `photo-${user.id}.png`;
 
         try {
-            await this.fileService.upload(photo, path);
+            await this.fileService.upload(photo, filename);
         } catch (e) {
             throw new BadRequestException(e)
         }
-        return { photo };
+        return photo;
     }
 
     @UseInterceptors(FilesInterceptor('files'))
